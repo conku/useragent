@@ -8,7 +8,9 @@
 // information that has been extracted from a parsed User Agent string.
 package useragent
 
-import "strings"
+import (
+	"strings"
+)
 
 // A section contains the name of the product, its version and
 // an optional comment.
@@ -147,6 +149,7 @@ func (p *UserAgent) Parse(ua string) {
 	p.ua = ua
 	for index, limit := 0, len(ua); index < limit; {
 		s := parseSection(ua, &index)
+
 		if !p.mobile && s.name == "Mobile" {
 			p.mobile = true
 		}
@@ -159,7 +162,9 @@ func (p *UserAgent) Parse(ua string) {
 		}
 
 		p.detectBrowser(sections)
+
 		p.detectOS(sections[0])
+
 		p.detectModel(sections[0])
 
 		if p.undecided {

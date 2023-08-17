@@ -28,6 +28,26 @@ type OSInfo struct {
 // Returns a string containing the normalized name for the Operating System.
 func normalizeOS(name string) string {
 	sp := strings.SplitN(name, " ", 3)
+	if strings.HasPrefix(name, "CPU") && len(sp) > 0 {
+
+		if sp[1] == "iPhone" || sp[1] == "iPad" {
+			if len(sp) > 2 {
+				vos := strings.SplitN(sp[2], " ", 3)
+				vs := strings.SplitN(vos[1], "_", 3)
+				if len(vs) == 1 {
+					return "iOS_" + vs[0] + ".0"
+				} else if len(vs) == 2 {
+					return "iOS_" + vs[0] + "." + vs[1]
+				} else if len(vs) == 3 {
+					firstChar := vs[2][0]
+					return "iOS_" + vs[0] + "." + vs[1] + string(firstChar)
+				}
+			} else {
+				return "iOS"
+			}
+		}
+	}
+
 	if len(sp) != 3 || sp[1] != "NT" {
 		return name
 	}
@@ -94,7 +114,24 @@ func webkit(p *UserAgent, comment []string) {
 		} else if len(comment) == 3 {
 			_ = p.googleOrBingBot()
 		}
+	} else if p.platform == "iPhone" || p.platform == "iPad" {
+		if len(comment) > 3 {
+			p.localization = comment[3]
+		}
+
+		if len(comment) < 2 {
+			p.localization = comment[0]
+		} else if len(comment) < 3 {
+			if !p.googleOrBingBot() && !p.iMessagePreview() {
+
+				p.os = normalizeOS(comment[1])
+			}
+		} else {
+			p.os = normalizeOS(comment[1])
+		}
+
 	} else if len(comment) > 0 {
+
 		if len(comment) > 3 {
 			p.localization = comment[3]
 		}
@@ -258,10 +295,12 @@ func getPlatform(comment []string) string {
 
 // Detect some properties of the OS from the given section.
 func (p *UserAgent) detectOS(s section) {
+
 	if s.name == "Mozilla" {
 		// Get the platform here. Be aware that IE11 provides a new format
 		// that is not backwards-compatible with previous versions of IE.
 		p.platform = getPlatform(s.comment)
+
 		if p.platform == "Windows" && len(s.comment) > 0 {
 			p.os = normalizeOS(s.comment[0])
 		}
@@ -293,6 +332,7 @@ func (p *UserAgent) detectOS(s section) {
 		// Check whether this is a bot or just a weird browser.
 		p.undecided = true
 	}
+
 }
 
 // Platform returns a string containing the platform..

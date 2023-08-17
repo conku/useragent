@@ -48,6 +48,7 @@ func (p *UserAgent) detectBrowser(sections []section) {
 		p.mozilla = "5.0"
 	} else if slen > 1 {
 		engine := sections[1]
+		//fmt.Println("###s:", engine)
 		p.browser.Engine = engine.name
 		p.browser.EngineVersion = engine.version
 		if slen > 2 {
