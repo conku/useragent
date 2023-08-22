@@ -42,13 +42,41 @@ func (p *UserAgent) detectBrowser(sections []section) {
 		if slen > 1 {
 			p.browser.EngineVersion = sections[1].version
 		}
+	} else if strings.Contains(strings.ToLower(sections[0].name), "xiaomi") {
+
+		// fmt.Println("###s:", sections[2])
+		// fmt.Println("###s:", sections[3])
+		// fmt.Println("###s:", sections[4])
+		// fmt.Println("###s:", sections[5])
+		p.browser.Name = "Xiaomi"
+		//p.browser.Version = sections[0].version
+		//p.browser.Engine = "Presto"
+		m := strings.SplitN(sections[0].name, "_", 3)
+		if len(m) > 0 {
+			p.model = m[1]
+		}
+
+		p.os = "Android 10"
+
+		// fmt.Println("p.model :", p.model)
+		// if len(sections) > 1 {
+		// 	fmt.Println("###s:", sections[2].version)
+		// 	v := strings.SplitN(sections[2].version, "/", 2)
+		// 	fmt.Println("###s:", len(v))
+		// 	if len(v) > 1 {
+		// 		p.os = "Android " + v[1]
+		// 	} else {
+		// 		p.os = "Android 10"
+		// 	}
+		// }
+
 	} else if sections[0].name == "Dalvik" {
 		// When Dalvik VM is in use, there is no browser info attached to ua.
 		// Although browser is still a Mozilla/5.0 compatible.
 		p.mozilla = "5.0"
 	} else if slen > 1 {
 		engine := sections[1]
-		//fmt.Println("###s:", engine)
+
 		p.browser.Engine = engine.name
 		p.browser.EngineVersion = engine.version
 		if slen > 2 {

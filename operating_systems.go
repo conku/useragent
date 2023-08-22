@@ -28,8 +28,8 @@ type OSInfo struct {
 // Returns a string containing the normalized name for the Operating System.
 func normalizeOS(name string) string {
 	sp := strings.SplitN(name, " ", 3)
-	if strings.HasPrefix(name, "CPU") && len(sp) > 0 {
 
+	if strings.HasPrefix(name, "CPU") && len(sp) > 0 {
 		if sp[1] == "iPhone" || sp[1] == "iPad" {
 			if len(sp) > 2 {
 				vos := strings.SplitN(sp[2], " ", 3)
@@ -114,20 +114,19 @@ func webkit(p *UserAgent, comment []string) {
 		} else if len(comment) == 3 {
 			_ = p.googleOrBingBot()
 		}
-	} else if p.platform == "iPhone" || p.platform == "iPad" {
+	} else if strings.Contains(p.platform, "iPhone") || p.platform == "iPad" {
 		if len(comment) > 3 {
 			p.localization = comment[3]
+		} else if len(comment) < 2 {
+			p.localization = comment[0]
 		}
 
-		if len(comment) < 2 {
-			p.localization = comment[0]
-		} else if len(comment) < 3 {
-			if !p.googleOrBingBot() && !p.iMessagePreview() {
-
+		if len(comment) > 1 {
+			if comment[1] == "U" {
+				p.os = normalizeOS(comment[2])
+			} else {
 				p.os = normalizeOS(comment[1])
 			}
-		} else {
-			p.os = normalizeOS(comment[1])
 		}
 
 	} else if len(comment) > 0 {
@@ -305,6 +304,7 @@ func (p *UserAgent) detectOS(s section) {
 			p.os = normalizeOS(s.comment[0])
 		}
 
+		// fmt.Println("p.browser.Engine", p.browser.Engine)
 		// And finally get the OS depending on the engine.
 		switch p.browser.Engine {
 		case "":
@@ -328,6 +328,9 @@ func (p *UserAgent) detectOS(s section) {
 		p.mobile = true
 		p.browser.Name = "OkHttp"
 		p.browser.Version = s.version
+	} else if strings.Contains(strings.ToLower(s.name), "xiaomi") {
+		p.mobile = true
+		p.platform = "Linux"
 	} else {
 		// Check whether this is a bot or just a weird browser.
 		p.undecided = true
