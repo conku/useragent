@@ -114,7 +114,23 @@ func webkit(p *UserAgent, comment []string) {
 		} else if len(comment) == 3 {
 			_ = p.googleOrBingBot()
 		}
-	} else if strings.Contains(p.platform, "iPhone") || p.platform == "iPad" {
+	} else if strings.Contains(p.platform, "iPhone") {
+		p.mobile = true
+		if len(comment) > 3 {
+			p.localization = comment[3]
+		} else if len(comment) < 2 {
+			p.localization = comment[0]
+		}
+
+		if len(comment) > 1 {
+			if comment[1] == "U" {
+				p.os = normalizeOS(comment[2])
+			} else {
+				p.os = normalizeOS(comment[1])
+			}
+		}
+
+	} else if strings.Contains(p.platform, "iPad") {
 		if len(comment) > 3 {
 			p.localization = comment[3]
 		} else if len(comment) < 2 {
